@@ -43,6 +43,16 @@ const gameState = {
     opponentConnected: true // Track opponent connection status
 };
 
+// Drag and drop state
+const dragState = {
+    isDragging: false,
+    draggedPiece: null, // {row, col}
+    originalPosition: null, // {row, col}
+    legalMoves: [], // Legal moves for dragged piece
+    currentHoverSquare: null, // {row, col} - square currently hovering over
+    previewActive: false // Whether we're showing a preview
+};
+
 // Piece values for AI evaluation
 const PIECE_VALUES = {
     pawn: 100,
@@ -1248,6 +1258,698 @@ function handleTileClick(row, col) {
     }
 }
 
+// ========================================
+// Drag and Drop Event Handlers
+// ========================================
+
+/**
+ * Handle drag start event
+ * @param {DragEvent} event
+ * @param {number} row
+ * @param {number} col
+ */
+function handleDragStart(event, row, col) {
+    const piece = board[row][col];
+    if (!piece) return;
+    
+    // Set drag state
+    dragState.isDragging = true;
+    dragState.draggedPiece = { row, col };
+    dragState.originalPosition = { row, col };
+    dragState.legalMoves = getLegalMoves(row, col);
+    dragState.previewActive = false;
+    
+    // Visual feedback - make original piece semi-transparent
+    event.target.style.opacity = '0.4';
+    event.target.classList.add('dragging');
+    
+    // Store data for drop handler
+    event.dataTransfer.setData('text/plain', JSON.stringify({ row, col }));
+    event.dataTransfer.effectAllowed = 'move';
+    
+    // Show legal moves by setting gameState
+    gameState.selectedPiece = { row, col };
+    gameState.legalMoves = dragState.legalMoves;
+    
+    // Manually highlight legal move tiles (don't re-render or it breaks the drag!)
+    dragState.legalMoves.forEach(move => {
+        const tile = document.querySelector(`.tile[data-row="${move.row}"][data-col="${move.col}"]`);
+        if (tile) {
+            // Add legal move indicator
+            const indicator = document.createElement('div');
+            indicator.className = 'legal-move-indicator';
+            
+            // Check if it's a capture move
+            const targetPiece = board[move.row][move.col];
+            if (targetPiece) {
+                indicator.classList.add('capture-indicator');
+            }
+            
+            tile.appendChild(indicator);
+        }
+    });
+    
+    console.log(`Drag started: ${piece.type} from ${String.fromCharCode(97 + col)}${8 - row}`);
+}
+
+/**
+ * Handle drag over event (hovering over a square)
+ * @param {DragEvent} event
+ */
+function handleDragOver(event) {
+    if (!dragState.isDragging) return;
+    
+    event.preventDefault(); // Required to allow drop
+    
+    const tile = event.currentTarget;
+    const row = parseInt(tile.dataset.row);
+    const col = parseInt(tile.dataset.col);
+    
+    // Check if this is a legal move
+    const isLegalMove = dragState.legalMoves.some(
+        move => move.row === row && move.col === col
+    );
+    
+    if (isLegalMove) {
+        event.dataTransfer.dropEffect = 'move';
+        
+        // Update preview if hovering over a new square
+        if (!dragState.currentHoverSquare || 
+            dragState.currentHoverSquare.row !== row || 
+            dragState.currentHoverSquare.col !== col) {
+            
+            dragState.currentHoverSquare = { row, col };
+            dragState.previewActive = true;
+            
+            // Update real-time preview
+            updateBoardPreview(dragState.draggedPiece, { row, col });
+        }
+    } else {
+        event.dataTransfer.dropEffect = 'none';
+    }
+}
+
+/**
+ * Handle drag enter event
+ * @param {DragEvent} event
+ * @param {number} row
+ * @param {number} col
+ */
+function handleDragEnter(event, row, col) {
+    if (!dragState.isDragging) return;
+    
+    const tile = event.currentTarget;
+    
+    // Check if this is a legal move
+    const isLegalMove = dragState.legalMoves.some(
+        move => move.row === row && move.col === col
+    );
+    
+    if (isLegalMove) {
+        tile.classList.add('drag-over-valid');
+    } else {
+        tile.classList.add('drag-over-invalid');
+    }
+}
+
+/**
+ * Handle drag leave event
+ * @param {DragEvent} event
+ */
+function handleDragLeave(event) {
+    const tile = event.currentTarget;
+    tile.classList.remove('drag-over-valid', 'drag-over-invalid');
+}
+
+/**
+ * Handle drop event
+ * @param {DragEvent} event
+ * @param {number} toRow
+ * @param {number} toCol
+ */
+function handleDrop(event, toRow, toCol) {
+    event.preventDefault();
+    event.stopPropagation();
+    
+    if (!dragState.isDragging) return;
+    
+    const tile = event.currentTarget;
+    tile.classList.remove('drag-over-valid', 'drag-over-invalid');
+    
+    // Check if this is a legal move
+    const legalMove = dragState.legalMoves.find(
+        move => move.row === toRow && move.col === toCol
+    );
+    
+    if (legalMove) {
+        // Execute the move
+        const { row: fromRow, col: fromCol } = dragState.draggedPiece;
+        console.log(`Drop: Moving from ${String.fromCharCode(97 + fromCol)}${8 - fromRow} to ${String.fromCharCode(97 + toCol)}${8 - toRow}`);
+        
+        // Execute move (this will handle all game logic, online sync, etc.)
+        movePiece(fromRow, fromCol, toRow, toCol, legalMove.moveData);
+    }
+    
+    // Clean up drag state
+    cleanupDragState();
+}
+
+/**
+ * Handle drag end event
+ * @param {DragEvent} event
+ */
+function handleDragEnd(event) {
+    // Restore original opacity
+    event.target.style.opacity = '1';
+    event.target.classList.remove('dragging');
+    
+    // Clean up if drop wasn't handled
+    if (dragState.isDragging) {
+        cleanupDragState();
+    }
+}
+
+/**
+ * Clean up drag state and re-render board
+ */
+function cleanupDragState() {
+    // Clear drag state
+    dragState.isDragging = false;
+    dragState.draggedPiece = null;
+    dragState.originalPosition = null;
+    dragState.legalMoves = [];
+    dragState.currentHoverSquare = null;
+    dragState.previewActive = false;
+    
+    // Clear selection state
+    gameState.selectedPiece = null;
+    gameState.legalMoves = [];
+    
+    // Remove any drag-related classes
+    document.querySelectorAll('.drag-over-valid, .drag-over-invalid').forEach(el => {
+        el.classList.remove('drag-over-valid', 'drag-over-invalid');
+    });
+    
+    // Remove legal move indicators
+    document.querySelectorAll('.legal-move-indicator').forEach(el => {
+        el.remove();
+    });
+    
+    // Re-render board to clean up
+    renderBoard();
+}
+
+/**
+ * Update board preview during drag (real-time attack range visualization)
+ * @param {Object} fromPos - {row, col}
+ * @param {Object} toPos - {row, col}
+ */
+function updateBoardPreview(fromPos, toPos) {
+    // Create temporary board state with piece moved
+    const tempBoard = board.map(row => row.map(piece => piece ? {...piece} : null));
+    
+    // Simulate the move
+    const piece = tempBoard[fromPos.row][fromPos.col];
+    tempBoard[toPos.row][toPos.col] = piece;
+    tempBoard[fromPos.row][fromPos.col] = null;
+    
+    // Update piece position (for attack calculation)
+    if (piece) {
+        piece.position = { row: toPos.row, col: toPos.col };
+    }
+    
+    // Calculate attack ranges for the preview board
+    const player1Attacks = [];
+    const player2Attacks = [];
+    
+    for (let r = 0; r < 8; r++) {
+        for (let c = 0; c < 8; c++) {
+            const p = tempBoard[r][c];
+            if (p) {
+                const attacks = calculateAttackingSquaresForBoard(p, r, c, tempBoard);
+                if (p.player === 1) {
+                    player1Attacks.push(...attacks);
+                } else {
+                    player2Attacks.push(...attacks);
+                }
+            }
+        }
+    }
+    
+    // Update tile overlays with preview
+    const p1Set = new Set(player1Attacks.map(coord => `${coord.row},${coord.col}`));
+    const p2Set = new Set(player2Attacks.map(coord => `${coord.row},${coord.col}`));
+    
+    for (let r = 0; r < 8; r++) {
+        for (let c = 0; c < 8; c++) {
+            const key = `${r},${c}`;
+            const p1Has = p1Set.has(key);
+            const p2Has = p2Set.has(key);
+            
+            if (p1Has && p2Has) {
+                tileOverlays[r][c] = 'purple';
+            } else if (p1Has) {
+                tileOverlays[r][c] = 'blue';
+            } else if (p2Has) {
+                tileOverlays[r][c] = 'red';
+            } else {
+                tileOverlays[r][c] = null;
+            }
+        }
+    }
+    
+    // Update tile overlays visually without re-rendering (to preserve drag state)
+    updateTileOverlaysVisual();
+}
+
+/**
+ * Update tile overlays visually without re-rendering the entire board
+ * This is used during drag operations to avoid destroying the dragged element
+ */
+function updateTileOverlaysVisual() {
+    for (let r = 0; r < 8; r++) {
+        for (let c = 0; c < 8; c++) {
+            const tile = document.querySelector(`.tile[data-row="${r}"][data-col="${c}"]`);
+            if (!tile) continue;
+            
+            // Remove existing overlay
+            const existingOverlay = tile.querySelector('.tile-overlay');
+            if (existingOverlay) {
+                existingOverlay.remove();
+            }
+            
+            // Add new overlay if needed
+            const overlayColor = tileOverlays[r][c];
+            if (overlayColor) {
+                const overlay = document.createElement('div');
+                overlay.className = 'tile-overlay';
+                overlay.style.position = 'absolute';
+                overlay.style.top = '0';
+                overlay.style.left = '0';
+                overlay.style.width = '100%';
+                overlay.style.height = '100%';
+                overlay.style.pointerEvents = 'none';
+                overlay.style.zIndex = '1';
+                
+                if (overlayColor === 'blue') {
+                    overlay.style.backgroundColor = 'rgba(100, 149, 237, 0.3)';
+                } else if (overlayColor === 'red') {
+                    overlay.style.backgroundColor = 'rgba(220, 53, 69, 0.3)';
+                } else if (overlayColor === 'purple') {
+                    overlay.style.backgroundColor = 'rgba(138, 43, 226, 0.3)';
+                }
+                
+                tile.insertBefore(overlay, tile.firstChild);
+            }
+            
+            // Update piece status borders based on current overlay state
+            const pieceElement = tile.querySelector('.piece');
+            if (pieceElement && board[r][c]) {
+                const piece = board[r][c];
+                const status = getPieceStatusFromOverlays(r, c, piece.player);
+                
+                // Remove old status classes
+                pieceElement.classList.remove('status-threatened', 'status-contested');
+                
+                // Add new status class
+                if (status === 'threatened') {
+                    pieceElement.classList.add('status-threatened');
+                } else if (status === 'contested') {
+                    pieceElement.classList.add('status-contested');
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Get piece status from the current tileOverlays (used during preview)
+ * This is faster and uses already-calculated data
+ * @param {number} row
+ * @param {number} col
+ * @param {number} player
+ * @returns {string} 'safe', 'threatened', or 'contested'
+ */
+function getPieceStatusFromOverlays(row, col, player) {
+    const overlay = tileOverlays[row][col];
+    
+    // Check if piece is under attack by opponent
+    const isUnderAttack = (player === 1 && (overlay === 'red' || overlay === 'purple')) ||
+                          (player === 2 && (overlay === 'blue' || overlay === 'purple'));
+    
+    if (!isUnderAttack) {
+        return 'safe'; // No border for safe pieces
+    }
+    
+    // Check if defended by ally
+    const isDefended = (player === 1 && (overlay === 'blue' || overlay === 'purple')) ||
+                       (player === 2 && (overlay === 'red' || overlay === 'purple'));
+    
+    if (overlay === 'purple') {
+        return 'contested'; // Both players can attack (contested)
+    } else if (isUnderAttack && !isDefended) {
+        return 'threatened'; // Under attack, not defended (danger!)
+    } else {
+        return 'safe';
+    }
+}
+
+/**
+ * Calculate attacking squares for a piece on a temporary board
+ * @param {Object} piece
+ * @param {number} row
+ * @param {number} col
+ * @param {Array} tempBoard
+ * @returns {Array} Array of {row, col} coordinates
+ */
+function calculateAttackingSquaresForBoard(piece, row, col, tempBoard) {
+    const attacks = [];
+    
+    switch (piece.type) {
+        case 'pawn':
+            attacks.push(...calculatePawnAttacksForBoard(row, col, piece.player, tempBoard));
+            break;
+        case 'knight':
+            attacks.push(...calculateKnightAttacksForBoard(row, col, tempBoard));
+            break;
+        case 'bishop':
+            attacks.push(...calculateBishopAttacksForBoard(row, col, tempBoard));
+            break;
+        case 'rook':
+            attacks.push(...calculateRookAttacksForBoard(row, col, tempBoard));
+            break;
+        case 'queen':
+            attacks.push(...calculateQueenAttacksForBoard(row, col, tempBoard));
+            break;
+        case 'king':
+            attacks.push(...calculateKingAttacksForBoard(row, col, tempBoard));
+            break;
+    }
+    
+    return attacks;
+}
+
+/**
+ * Helper functions for calculating attacks on temporary board
+ * These mirror the existing attack calculation functions but use tempBoard
+ */
+
+function calculatePawnAttacksForBoard(row, col, player, tempBoard) {
+    const attacks = [];
+    const direction = player === 1 ? -1 : 1;
+    
+    // Diagonal attacks
+    const attackSquares = [
+        { row: row + direction, col: col - 1 },
+        { row: row + direction, col: col + 1 }
+    ];
+    
+    attackSquares.forEach(square => {
+        if (square.row >= 0 && square.row < 8 && square.col >= 0 && square.col < 8) {
+            attacks.push(square);
+        }
+    });
+    
+    return attacks;
+}
+
+function calculateKnightAttacksForBoard(row, col, tempBoard) {
+    const attacks = [];
+    const moves = [
+        [-2, -1], [-2, 1], [-1, -2], [-1, 2],
+        [1, -2], [1, 2], [2, -1], [2, 1]
+    ];
+    
+    moves.forEach(([dRow, dCol]) => {
+        const newRow = row + dRow;
+        const newCol = col + dCol;
+        if (newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) {
+            attacks.push({ row: newRow, col: newCol });
+        }
+    });
+    
+    return attacks;
+}
+
+function calculateBishopAttacksForBoard(row, col, tempBoard) {
+    return calculateSlidingAttacksForBoard(row, col, [[1,1], [1,-1], [-1,1], [-1,-1]], tempBoard);
+}
+
+function calculateRookAttacksForBoard(row, col, tempBoard) {
+    return calculateSlidingAttacksForBoard(row, col, [[1,0], [-1,0], [0,1], [0,-1]], tempBoard);
+}
+
+function calculateQueenAttacksForBoard(row, col, tempBoard) {
+    return calculateSlidingAttacksForBoard(row, col, 
+        [[1,0], [-1,0], [0,1], [0,-1], [1,1], [1,-1], [-1,1], [-1,-1]], tempBoard);
+}
+
+function calculateKingAttacksForBoard(row, col, tempBoard) {
+    const attacks = [];
+    const directions = [
+        [-1, -1], [-1, 0], [-1, 1],
+        [0, -1],           [0, 1],
+        [1, -1],  [1, 0],  [1, 1]
+    ];
+    
+    directions.forEach(([dRow, dCol]) => {
+        const newRow = row + dRow;
+        const newCol = col + dCol;
+        if (newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) {
+            attacks.push({ row: newRow, col: newCol });
+        }
+    });
+    
+    return attacks;
+}
+
+function calculateSlidingAttacksForBoard(row, col, directions, tempBoard) {
+    const attacks = [];
+    
+    directions.forEach(([dRow, dCol]) => {
+        let currentRow = row + dRow;
+        let currentCol = col + dCol;
+        
+        while (currentRow >= 0 && currentRow < 8 && currentCol >= 0 && currentCol < 8) {
+            attacks.push({ row: currentRow, col: currentCol });
+            
+            // Stop if we hit a piece
+            if (tempBoard[currentRow][currentCol]) {
+                break;
+            }
+            
+            currentRow += dRow;
+            currentCol += dCol;
+        }
+    });
+    
+    return attacks;
+}
+
+// ========================================
+// Touch Event Handlers (Mobile Support)
+// ========================================
+
+let touchState = {
+    active: false,
+    startPos: null,
+    ghostElement: null,
+    lastTouchX: 0,
+    lastTouchY: 0
+};
+
+/**
+ * Handle touch start event (mobile)
+ * @param {TouchEvent} event
+ * @param {number} row
+ * @param {number} col
+ */
+function handleTouchStart(event, row, col) {
+    event.preventDefault(); // Prevent scrolling
+    
+    const piece = board[row][col];
+    if (!piece) return;
+    
+    const touch = event.touches[0];
+    
+    // Set touch state
+    touchState.active = true;
+    touchState.startPos = { row, col };
+    touchState.lastTouchX = touch.clientX;
+    touchState.lastTouchY = touch.clientY;
+    
+    // Set drag state (reuse existing drag state)
+    dragState.isDragging = true;
+    dragState.draggedPiece = { row, col };
+    dragState.originalPosition = { row, col };
+    dragState.legalMoves = getLegalMoves(row, col);
+    dragState.previewActive = false;
+    
+    // Show legal moves
+    gameState.selectedPiece = { row, col };
+    gameState.legalMoves = dragState.legalMoves;
+    
+    // Create ghost element
+    const pieceElement = event.target;
+    touchState.ghostElement = createTouchGhost(pieceElement);
+    document.body.appendChild(touchState.ghostElement);
+    
+    // Position ghost at touch location
+    touchState.ghostElement.style.left = touch.clientX + 'px';
+    touchState.ghostElement.style.top = touch.clientY + 'px';
+    
+    // Make original piece semi-transparent
+    pieceElement.style.opacity = '0.4';
+    
+    // Re-render to show legal moves
+    renderBoard();
+    
+    console.log(`Touch drag started: ${piece.type} from ${String.fromCharCode(97 + col)}${8 - row}`);
+}
+
+/**
+ * Handle touch move event (mobile)
+ * @param {TouchEvent} event
+ */
+function handleTouchMove(event) {
+    if (!touchState.active) return;
+    event.preventDefault(); // Prevent scrolling
+    
+    const touch = event.touches[0];
+    touchState.lastTouchX = touch.clientX;
+    touchState.lastTouchY = touch.clientY;
+    
+    // Move ghost element
+    if (touchState.ghostElement) {
+        touchState.ghostElement.style.left = touch.clientX + 'px';
+        touchState.ghostElement.style.top = touch.clientY + 'px';
+    }
+    
+    // Determine which tile we're over
+    const element = document.elementFromPoint(touch.clientX, touch.clientY);
+    const tile = element?.closest('.tile');
+    
+    if (tile) {
+        const row = parseInt(tile.dataset.row);
+        const col = parseInt(tile.dataset.col);
+        
+        // Check if legal move
+        const isLegalMove = dragState.legalMoves.some(
+            move => move.row === row && move.col === col
+        );
+        
+        // Update preview if hovering over new square
+        if (!dragState.currentHoverSquare || 
+            dragState.currentHoverSquare.row !== row || 
+            dragState.currentHoverSquare.col !== col) {
+            
+            // Remove previous highlights
+            document.querySelectorAll('.drag-over-valid, .drag-over-invalid').forEach(el => {
+                el.classList.remove('drag-over-valid', 'drag-over-invalid');
+            });
+            
+            // Add highlight to current tile
+            if (isLegalMove) {
+                tile.classList.add('drag-over-valid');
+                dragState.currentHoverSquare = { row, col };
+                dragState.previewActive = true;
+                updateBoardPreview(dragState.draggedPiece, { row, col });
+            } else {
+                tile.classList.add('drag-over-invalid');
+            }
+        }
+    }
+}
+
+/**
+ * Handle touch end event (mobile)
+ * @param {TouchEvent} event
+ */
+function handleTouchEnd(event) {
+    if (!touchState.active) return;
+    event.preventDefault();
+    
+    const touch = event.changedTouches[0];
+    
+    // Determine which tile we're over
+    const element = document.elementFromPoint(touch.clientX, touch.clientY);
+    const tile = element?.closest('.tile');
+    
+    if (tile) {
+        const toRow = parseInt(tile.dataset.row);
+        const toCol = parseInt(tile.dataset.col);
+        
+        // Check if this is a legal move
+        const legalMove = dragState.legalMoves.find(
+            move => move.row === toRow && move.col === toCol
+        );
+        
+        if (legalMove) {
+            // Execute the move
+            const { row: fromRow, col: fromCol } = dragState.draggedPiece;
+            console.log(`Touch drop: Moving from ${String.fromCharCode(97 + fromCol)}${8 - fromRow} to ${String.fromCharCode(97 + toCol)}${8 - toRow}`);
+            movePiece(fromRow, fromCol, toRow, toCol, legalMove.moveData);
+        }
+    }
+    
+    // Clean up touch state
+    cleanupTouchState();
+    cleanupDragState();
+}
+
+/**
+ * Create a ghost element for touch dragging
+ * @param {HTMLElement} pieceElement
+ * @returns {HTMLElement}
+ */
+function createTouchGhost(pieceElement) {
+    const ghost = document.createElement('div');
+    ghost.className = 'touch-ghost-piece';
+    ghost.textContent = pieceElement.textContent;
+    ghost.style.fontSize = '50px';
+    ghost.style.position = 'fixed';
+    ghost.style.pointerEvents = 'none';
+    ghost.style.zIndex = '10000';
+    ghost.style.opacity = '0.8';
+    ghost.style.transform = 'translate(-50%, -50%)';
+    ghost.style.transition = 'none';
+    
+    // Copy piece styling
+    if (pieceElement.classList.contains('player1-piece')) {
+        ghost.style.color = '#F5E6D3';
+        ghost.style.textShadow = '-1px -1px 0 #2c2c2c, 1px -1px 0 #2c2c2c, -1px 1px 0 #2c2c2c, 1px 1px 0 #2c2c2c, 0 0 3px rgba(0, 0, 0, 0.5)';
+    } else {
+        ghost.style.color = '#1a1a1a';
+        ghost.style.textShadow = '-1px -1px 0 #e8e8e8, 1px -1px 0 #e8e8e8, -1px 1px 0 #e8e8e8, 1px 1px 0 #e8e8e8, 0 0 3px rgba(255, 255, 255, 0.5)';
+    }
+    
+    return ghost;
+}
+
+/**
+ * Clean up touch state
+ */
+function cleanupTouchState() {
+    if (touchState.ghostElement && touchState.ghostElement.parentNode) {
+        document.body.removeChild(touchState.ghostElement);
+    }
+    
+    touchState.active = false;
+    touchState.startPos = null;
+    touchState.ghostElement = null;
+    touchState.lastTouchX = 0;
+    touchState.lastTouchY = 0;
+    
+    // Restore opacity of all pieces
+    document.querySelectorAll('.piece').forEach(piece => {
+        piece.style.opacity = '1';
+    });
+}
+
+// ========================================
+// Board Rendering
+// ========================================
+
 /**
  * Render the entire board
  */
@@ -1356,10 +2058,33 @@ function renderBoard() {
                 const color = piece.player === 1 ? 'white' : 'black';
                 pieceElement.textContent = PIECES[piece.type][color];
                 
+                // Make piece draggable if it's the player's turn and it's their piece
+                const canDrag = !gameState.gameOver && piece.player === gameState.currentTurn &&
+                    (gameState.gameMode !== 'online' || piece.player === gameState.playerNumber);
+                
+                if (canDrag) {
+                    pieceElement.setAttribute('draggable', 'true');
+                    pieceElement.addEventListener('dragstart', (e) => handleDragStart(e, row, col));
+                    pieceElement.addEventListener('dragend', handleDragEnd);
+                    
+                    // Add touch support for mobile
+                    pieceElement.addEventListener('touchstart', (e) => handleTouchStart(e, row, col), {passive: false});
+                }
+                
                 tile.appendChild(pieceElement);
             }
             
-            // Add click handler
+            // Add drop event listeners to all tiles
+            tile.addEventListener('dragover', handleDragOver);
+            tile.addEventListener('drop', (e) => handleDrop(e, row, col));
+            tile.addEventListener('dragenter', (e) => handleDragEnter(e, row, col));
+            tile.addEventListener('dragleave', handleDragLeave);
+            
+            // Add touch move/end listeners to tiles (for mobile drop detection)
+            tile.addEventListener('touchmove', handleTouchMove, {passive: false});
+            tile.addEventListener('touchend', handleTouchEnd, {passive: false});
+            
+            // Keep click handler as fallback
             tile.addEventListener('click', () => handleTileClick(row, col));
             
             chessboard.appendChild(tile);
