@@ -1,0 +1,3 @@
+- Bishop could defend pawn, but defense is not shown I think
+- Castling not implemented
+- Play Again and Back to Menu do nothing

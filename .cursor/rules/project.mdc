@@ -1,0 +1,26 @@
+---
+alwaysApply: true
+---
+Perfect Chess is chess but with the board displaying more information about where units can attack and what unit are currently at risk.  It's meant to provide more information to the player about the current state of the game, and let the visualize the state of the game in a new way.
+
+Board Changes
+- Player 1's units show the immediate attack range of their current units in blue.  The visual effect is a blue tint (blue at 50% opacity) on the tile.  For example, at the beginning on the game, the player would see the row above their pawns as blue, given that the pawns (and knight) can move to that row on the players turn.
+- Player 2's units show the attack range of their units in red.  At the start of the game, we would expect the row below Player 2's pawns to be red, given that as above the pawns and knight can attack positions in that row.
+- If both players can move to a postion, it is colored purple.  In a scenario where two queens were opposing each other, we would expect to see each tile between them to be purple (given that they can both attack the squares between them).
+- A player's chess piece takes on the color effect of the tile underneath.  This is meant to illustrate when a unit is protected or under attack.  
+
+Plan
+
+Will be browser based, let's a simple implementation without a lot of dependencies.
+
+PHASE ONE
+- Create a basic top down chessboard that allows us to tint the tiles on the board to red, blue, or purple.  A queen piece is in the center of the board and we should implement basic tile highlighting.  i.e. we would expect to render a board with a queen, and the eight directions the queen can move have their tiles highlighted.
+
+PHASE TWO
+- Add a pawn to the board, and add basic piece movement.
+
+PHASE THREE
+- Add a queen for Player 2
+
+PHASE FOUR
+- Add the remaining pieces and finalize the implementation of the game rules
