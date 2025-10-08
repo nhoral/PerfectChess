@@ -6,7 +6,8 @@
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    /* Phase 12: Natural green background matching board */
+    background: #556B2F; /* Deep forest green */
     min-height: 100vh;
     display: flex;
     justify-content: center;
@@ -14,7 +15,7 @@ body {
     padding: 20px;
 }
 
-/* Menu Screen */
+/* Menu Screen - Phase 12: Natural aesthetic */
 .menu-screen {
     display: flex;
     flex-direction: column;
@@ -22,23 +23,24 @@ body {
     justify-content: center;
     min-height: 80vh;
     padding: 40px;
+    background: transparent;
 }
 
 .menu-title {
     font-size: 4em;
     margin-bottom: 10px;
-    background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    text-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    color: #F5E6D3; /* Parchment */
+    text-shadow: 
+        0 4px 8px rgba(0, 0, 0, 0.5),
+        0 0 20px rgba(255, 215, 0, 0.3); /* Golden glow */
 }
 
 .menu-subtitle {
     font-size: 1.3em;
-    color: rgba(255, 255, 255, 0.9);
+    color: rgba(245, 230, 211, 0.9);
     margin-bottom: 40px;
     text-align: center;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .menu-buttons {
@@ -53,20 +55,21 @@ body {
     align-items: center;
     padding: 30px 40px;
     font-size: 1.2em;
-    background: white;
-    border: 3px solid rgba(255, 255, 255, 0.8);
+    background: rgba(139, 115, 85, 0.8); /* Warm brown */
+    border: 3px solid rgba(245, 230, 211, 0.4);
     border-radius: 15px;
     cursor: pointer;
     transition: all 0.3s ease;
     min-width: 200px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    color: #F5E6D3;
 }
 
 .menu-btn:hover {
     transform: translateY(-5px);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-    background: rgba(255, 255, 255, 0.95);
-    border-color: white;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    background: rgba(139, 115, 85, 1);
+    border-color: #FFD700; /* Gold */
 }
 
 .btn-icon {
@@ -79,47 +82,51 @@ body {
 }
 
 .container {
-    background: white;
+    /* Phase 12: Transparent container for natural aesthetic */
+    background: transparent;
     border-radius: 15px;
     padding: 30px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    max-width: 100%;
 }
 
 h1 {
     text-align: center;
-    color: #333;
+    color: #F5E6D3; /* Parchment color */
     margin-bottom: 10px;
     font-size: 2.5em;
+    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
 }
 
 .subtitle {
     text-align: center;
-    color: #666;
+    color: rgba(245, 230, 211, 0.9); /* Parchment with opacity */
     margin-bottom: 20px;
     font-size: 1.1em;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .turn-indicator {
     text-align: center;
-    font-size: 1.3em;
-    font-weight: bold;
+    font-size: 1.2em;
+    font-weight: 600;
     padding: 12px 20px;
     margin: 0 auto 25px auto;
     border-radius: 8px;
     max-width: 300px;
     transition: all 0.3s ease;
+    /* Phase 12: Subtle, earthy styling */
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(5px);
+    color: #F5E6D3;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
 
 .turn-indicator.player1 {
-    background-color: rgba(0, 0, 255, 0.15);
-    color: #0056b3;
-    border: 2px solid rgba(0, 0, 255, 0.4);
+    border: 2px solid rgba(255, 215, 0, 0.6); /* Gold border */
 }
 
 .turn-indicator.player2 {
-    background-color: rgba(255, 0, 0, 0.15);
-    color: #b30000;
-    border: 2px solid rgba(255, 0, 0, 0.4);
+    border: 2px solid rgba(169, 169, 169, 0.6); /* Silver/gray border */
 }
 
 .board-wrapper {
@@ -133,56 +140,62 @@ h1 {
     flex-direction: column;
     justify-content: space-around;
     padding-right: 10px;
+    /* Height matches board height */
+    height: min(90vmin, 1028px);
 }
 
 .rank-label {
-    height: 96px; /* Match tile height */
+    flex: 1; /* Equal height distribution */
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: bold;
-    color: #555;
-    font-size: 1.3em;
+    color: #F5E6D3; /* Parchment color */
+    font-size: clamp(0.8em, 2vmin, 1.3em); /* Responsive font size */
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 /* Phase 10: Unified Chessboard Background */
 
-/* Chessboard container - holds background and grid */
+/* Phase 12: Responsive Chessboard - scales to viewport */
 .chessboard-container {
     position: relative;
-    width: 1028px;
-    height: 1028px;
+    /* Use vmin for responsive scaling, max 1028px */
+    width: min(90vmin, 1028px);
+    height: min(90vmin, 1028px);
     margin: 0 auto;
 }
 
-/* Background image - lowest layer */
+/* Background image - lowest layer, scales with container */
 .chessboard-background {
     position: absolute;
-    border: 1px solid #000;
     top: 0;
     left: 0;
-    width: 1028px;
-    height: 1028px;
+    width: 100%;
+    height: 100%;
     pointer-events: none; /* Don't block tile interactions */
     z-index: 0;
     user-select: none;
 }
 
-/* Interactive grid - positioned over background */
+/* Interactive grid - positioned over background using percentages */
 .chessboard-grid {
     position: absolute;
-    top: 112px;  /* Offset from top of background - ADJUSTING */
-    left: 101px;  /* Offset from left of background - ADJUSTING */
+    /* Use percentages to maintain offset ratio as board scales */
+    top: 10.89%;    /* 112px / 1028px */
+    left: 9.82%;    /* 101px / 1028px */
+    width: 80.75%;  /* Slightly wider tiles - adjusting for alignment */
+    height: 77.82%; /* 800px / 1028px (100px × 8) */
     display: grid;
-    grid-template-columns: repeat(8, 104px);  /* Actual tile width */
-    grid-template-rows: repeat(8, 100px);      /* Actual tile height */
+    grid-template-columns: repeat(8, 1fr); /* Equal fractions */
+    grid-template-rows: repeat(8, 1fr);
     z-index: 1;
 }
 
-/* Tiles - now transparent interactive areas */
+/* Tiles - now use flexbox, scale with grid */
 .tile {
-    width: 104px;   /* Match background tile width */
-    height: 100px;   /* Match background tile height */
+    width: 100%;
+    height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -228,8 +241,11 @@ h1 {
 /* Piece container - now holds image instead of Unicode text */
 .piece {
     position: relative;
-    width: 60px;  /* Match image width */
-    height: 70px; /* Max height to accommodate tallest piece (queen ~68px) */
+    /* Scale with tile - use percentages */
+    width: 60%;  /* ~60px on 100px tile */
+    height: 70%; /* Max height */
+    max-width: 60px;  /* Don't exceed original size */
+    max-height: 70px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -248,16 +264,16 @@ h1 {
     display: block;
 }
 
-/* Player 1 pieces - Original golden/yellow color */
+/* Player 1 pieces - Use white piece images */
 .piece.player1-piece .piece-image {
     filter: none;
-    /* Original image colors */
+    /* Original white piece images */
 }
 
-/* Player 2 pieces - Darkened to appear black */
+/* Player 2 pieces - Use black piece images (no filter needed) */
 .piece.player2-piece .piece-image {
-    filter: brightness(0.35) contrast(1.3) saturate(0.7) hue-rotate(200deg);
-    /* Makes pieces appear dark with slight blue tint */
+    filter: none;
+    /* Using actual black piece images instead of CSS filters */
 }
 
 /* Piece Status Indicators (Option A) */
@@ -266,7 +282,7 @@ h1 {
 .piece.status-threatened {
     border-radius: 8px;
     box-shadow: 
-        0 0 0 3px rgba(220, 20, 20, 0.9),
+        0 0 0 min(3px, 0.4vmin) rgba(220, 20, 20, 0.9),
         0 0 8px 2px rgba(220, 20, 20, 0.6);
     animation: pulse-threat 1.5s ease-in-out infinite;
 }
@@ -297,7 +313,7 @@ h1 {
 .piece.status-contested {
     border-radius: 8px;
     box-shadow: 
-        0 0 0 3px rgba(255, 165, 0, 0.9),
+        0 0 0 min(3px, 0.4vmin) rgba(255, 165, 0, 0.9),
         0 0 8px 2px rgba(255, 165, 0, 0.6);
     animation: pulse-contested 2s ease-in-out infinite;
 }
@@ -377,16 +393,18 @@ body.dragging * {
 
 /* Selected piece indicator */
 .tile.selected {
-    box-shadow: inset 0 0 0 3px rgba(255, 215, 0, 0.9);
+    box-shadow: inset 0 0 0 min(3px, 0.4vmin) rgba(255, 215, 0, 0.9);
     z-index: 5;
 }
 
-/* Legal move indicators - scaled for rectangular tiles */
+/* Legal move indicators - responsive scaling */
 .tile.legal-move::after {
     content: '';
     position: absolute;
-    width: 32px;  /* Scaled for 103px wide tiles */
-    height: 32px; /* Circular indicator */
+    width: 30%;  /* Percentage of tile size */
+    height: 30%;
+    max-width: 32px;
+    max-height: 32px;
     background-color: rgba(0, 255, 0, 0.6);
     border-radius: 50%;
     pointer-events: none;
@@ -395,10 +413,12 @@ body.dragging * {
 
 /* Legal move on occupied square (capture) - show larger ring */
 .tile.legal-move:has(.piece)::after {
-    width: 80px;  /* Capture indicator */
-    height: 75px; /* Slightly oval to fit rectangular tiles */
+    width: 75%;  /* Percentage of tile size */
+    height: 75%;
+    max-width: 80px;
+    max-height: 75px;
     background-color: transparent;
-    border: 5px solid rgba(0, 255, 0, 0.7);
+    border: min(5px, 0.6vmin) solid rgba(0, 255, 0, 0.7);
     border-radius: 50%;
 }
 
@@ -431,43 +451,83 @@ body.dragging * {
 
 /* Touch ghost piece (mobile) - Phase 11 update */
 .touch-ghost-piece.player1-piece .piece-image {
-    filter: none; /* Original golden color */
+    filter: none; /* White piece images */
 }
 
 .touch-ghost-piece.player2-piece .piece-image {
-    filter: brightness(0.35) contrast(1.3) saturate(0.7) hue-rotate(200deg);
+    filter: none; /* Black piece images - no filter needed */
 }
 
 .file-labels {
     position: absolute;
-    top: 879px; /* Below board: 111px (top offset) + 768px (board height: 96*8) */
-    left: 93px; /* Match board offset */
+    bottom: -5%; /* Position below board */
+    left: 9.82%; /* Match grid offset */
+    width: 80.75%; /* Match grid width */
     display: grid;
-    grid-template-columns: repeat(8, 103px);
-    width: 824px; /* 103px * 8 tiles */
+    grid-template-columns: repeat(8, 1fr);
 }
 
 .file-label {
-    width: 103px;
     text-align: center;
     font-weight: bold;
-    color: #555;
-    font-size: 1.3em;
+    color: #F5E6D3; /* Parchment color */
+    font-size: clamp(0.8em, 2vmin, 1.3em); /* Responsive font size */
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
-/* Legend */
+/* Legend - Phase 12: Subtle, minimal design with collapsible functionality */
 .legend {
-    background: #f5f5f5;
-    padding: 15px;
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(245, 230, 211, 0.3);
     border-radius: 8px;
+    padding: 15px;
     margin-top: 20px;
+    color: #F5E6D3;
 }
 
-.legend h3 {
-    color: #333;
-    margin-bottom: 15px;
+.legend-header {
+    color: #FFD700; /* Gold */
+    margin: 0 0 15px 0;
     font-size: 1.2em;
     text-align: center;
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.3s ease;
+}
+
+.legend-header:hover {
+    color: #FFF;
+    transform: scale(1.02);
+}
+
+.legend-toggle {
+    font-size: 0.8em;
+    transition: transform 0.3s ease;
+}
+
+.legend.collapsed .legend-toggle {
+    transform: rotate(-90deg);
+}
+
+.legend-content {
+    max-height: 500px;
+    overflow: hidden;
+    transition: max-height 0.4s ease, opacity 0.3s ease;
+    opacity: 1;
+}
+
+.legend.collapsed .legend-content {
+    max-height: 0;
+    opacity: 0;
+}
+
+.legend.collapsed {
+    padding-bottom: 15px;
 }
 
 .legend-section {
@@ -479,10 +539,11 @@ body.dragging * {
 }
 
 .legend-section h4 {
-    color: #555;
+    color: #F5E6D3;
     font-size: 1em;
     margin-bottom: 8px;
     font-weight: 600;
+    opacity: 0.9;
 }
 
 .legend-item {
@@ -511,10 +572,10 @@ body.dragging * {
     background-color: rgba(128, 0, 128, 0.5);
 }
 
-/* Legend piece status indicators - updated for images */
+/* Legend piece status indicators - responsive sizing */
 .legend-status {
-    width: 35px;
-    height: 40px;
+    width: min(35px, 4.5vmin);
+    height: min(40px, 5vmin);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -522,16 +583,16 @@ body.dragging * {
 }
 
 .legend-status img {
-    width: 30px;
+    width: min(30px, 3.5vmin);
     height: auto;
 }
 
 .legend-status.threatened {
-    box-shadow: 0 0 0 2px rgba(220, 20, 20, 0.9);
+    box-shadow: 0 0 0 min(2px, 0.3vmin) rgba(220, 20, 20, 0.9);
 }
 
 .legend-status.contested {
-    box-shadow: 0 0 0 2px rgba(255, 165, 0, 0.9);
+    box-shadow: 0 0 0 min(2px, 0.3vmin) rgba(255, 165, 0, 0.9);
 }
 
 /* AI Thinking Indicator */
@@ -575,22 +636,30 @@ body.dragging * {
 }
 
 .game-controls button {
-    padding: 10px 20px;
+    /* Phase 12: Earthy, wooden button style */
+    padding: 12px 24px;
     font-size: 1em;
-    border: 2px solid #667eea;
-    background: white;
-    color: #667eea;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s ease;
+    background: rgba(139, 115, 85, 0.8); /* Warm brown */
+    border: 2px solid rgba(245, 230, 211, 0.4);
+    border-radius: 6px;
+    color: #F5E6D3;
     font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
 .game-controls button:hover {
-    background: #667eea;
-    color: white;
+    background: rgba(139, 115, 85, 1);
+    border-color: rgba(245, 230, 211, 0.8);
+    color: #FFD700; /* Gold on hover */
     transform: translateY(-2px);
-    box-shadow: 0 4px 10px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+}
+
+.game-controls button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 /* Game Over Overlay */
@@ -622,8 +691,8 @@ body.dragging * {
 .game-over-overlay h2 {
     font-size: 3em;
     margin-bottom: 15px;
-    color: #667eea;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    color: #FFD700; /* Gold */
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .game-over-overlay p {
@@ -642,18 +711,21 @@ body.dragging * {
     padding: 15px 35px;
     font-size: 1.1em;
     font-weight: 600;
-    border: none;
+    border: 2px solid rgba(245, 230, 211, 0.4);
     border-radius: 10px;
     cursor: pointer;
     transition: all 0.3s ease;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    background: rgba(139, 115, 85, 0.9); /* Warm brown */
+    color: #F5E6D3;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
 }
 
 .game-over-btn:hover {
     transform: translateY(-3px);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+    background: rgba(139, 115, 85, 1);
+    border-color: #FFD700;
+    color: #FFD700;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
 }
 
 .game-over-btn:active {
@@ -689,18 +761,21 @@ body.dragging * {
 }
 
 .waiting-content {
-    background: white;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(20px);
+    border: 2px solid rgba(245, 230, 211, 0.3);
     padding: 50px;
     border-radius: 20px;
     text-align: center;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
     max-width: 500px;
     width: 90%;
+    color: #F5E6D3;
 }
 
 .waiting-content h2 {
     margin-bottom: 20px;
-    color: #667eea;
+    color: #FFD700; /* Gold */
 }
 
 .spinner-large {
@@ -715,13 +790,13 @@ body.dragging * {
 }
 
 .game-code strong {
-    color: #667eea;
+    color: #FFD700; /* Gold */
     font-size: 2em;
     letter-spacing: 5px;
 }
 
 .share-text {
-    color: #666;
+    color: rgba(245, 230, 211, 0.9);
     margin-bottom: 20px;
 }
 
@@ -739,15 +814,18 @@ body.dragging * {
     font-size: 0.9em;
 }
 
-/* Online Game Info Bar */
+/* Online Game Info Bar - Phase 12 */
 .online-info {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 15px 20px;
-    background: #f8f9fa;
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(245, 230, 211, 0.3);
     border-radius: 10px;
     margin-bottom: 20px;
+    color: #F5E6D3;
 }
 
 .player-info {
@@ -758,17 +836,17 @@ body.dragging * {
 
 .player-name {
     font-weight: 600;
-    color: #333;
+    color: #F5E6D3;
 }
 
 .player-color {
-    color: #666;
+    color: rgba(245, 230, 211, 0.8);
     font-size: 0.9em;
 }
 
 .game-code-display {
     font-weight: bold;
-    color: #667eea;
+    color: #FFD700; /* Gold */
 }
 
 .player-status {
@@ -780,117 +858,125 @@ body.dragging * {
 /* Button Styles */
 .btn-primary {
     padding: 12px 24px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border: none;
+    background: rgba(139, 115, 85, 0.9);
+    color: #F5E6D3;
+    border: 2px solid rgba(245, 230, 211, 0.4);
     border-radius: 8px;
     font-size: 1em;
     cursor: pointer;
     transition: all 0.3s ease;
     font-weight: 600;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
 .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    background: rgba(139, 115, 85, 1);
+    border-color: #FFD700;
+    color: #FFD700;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
 }
 
 .btn-secondary {
     padding: 12px 24px;
-    background: #e0e0e0;
-    color: #333;
-    border: none;
+    background: rgba(85, 107, 47, 0.6); /* Darker green */
+    color: #F5E6D3;
+    border: 2px solid rgba(245, 230, 211, 0.3);
     border-radius: 8px;
     font-size: 1em;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
     font-weight: 600;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
 }
 
 .btn-secondary:hover {
-    background: #d0d0d0;
+    background: rgba(85, 107, 47, 0.8);
+    border-color: rgba(245, 230, 211, 0.6);
     transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
 }
 
-/* Menu Button Primary Style */
+/* Menu Button Primary Style - Phase 12 */
 .menu-btn.primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border-color: white;
+    background: rgba(107, 124, 61, 0.9); /* Olive green - matches board */
+    border-color: #FFD700; /* Gold */
+    color: #F5E6D3;
 }
 
-/* Responsive adjustments */
+.menu-btn.primary:hover {
+    background: rgba(107, 124, 61, 1);
+    border-color: #FFD700;
+    box-shadow: 0 10px 30px rgba(255, 215, 0, 0.3);
+}
+
+/* Phase 12: Simplified Responsive adjustments - board scales automatically with vmin */
 @media (max-width: 600px) {
-    .chessboard-container {
-        width: 445px;  /* Scale down proportionally (1028 * 0.433) */
-        height: 445px;
+    body {
+        padding: 10px;
     }
     
-    .chessboard-background {
-        width: 445px;
-        height: 445px;
+    .container {
+        padding: 15px;
     }
     
-    .chessboard-grid {
-        top: 48px;  /* Scaled: 111 * 0.433 */
-        left: 40px;  /* Scaled: 93 * 0.433 */
-        grid-template-columns: repeat(8, 45px);  /* Scaled: 103 * 0.437 */
-        grid-template-rows: repeat(8, 42px);     /* Scaled: 96 * 0.437 */
+    h1 {
+        font-size: 1.8em;
     }
     
-    .tile {
-        width: 45px;
-        height: 42px;
-    }
-    
-    .piece {
-        width: 40px;  /* Scale down for mobile */
-        height: 48px;
-    }
-    
-    .piece-image {
-        max-width: 100%;
-        max-height: 100%;
-    }
-    
-    .file-labels {
-        top: 384px;  /* Scaled: 879 * 0.437 */
-        left: 40px;   /* Scaled: 93 * 0.433 */
-        grid-template-columns: repeat(8, 45px);
-        width: 360px; /* 45px * 8 tiles */
-    }
-    
-    .file-label {
-        width: 45px;
+    .subtitle {
         font-size: 1em;
     }
     
-    .rank-label {
-        height: 42px;  /* Match mobile tile height */
+    .turn-indicator {
+        font-size: 1em;
+        padding: 8px 15px;
+    }
+    
+    .legend {
+        font-size: 0.9em;
+        padding: 12px;
+    }
+    
+    .legend h3 {
         font-size: 1em;
     }
     
-    .legal-move-indicator,
-    .tile.legal-move::after {
-        width: 14px;
-        height: 14px;
+    .board-wrapper {
+        gap: 5px;
     }
     
-    .legal-move-indicator.capture-indicator,
-    .tile.legal-move:has(.piece)::after {
-        width: 35px;
-        height: 33px;
-        border-width: 3px;
+    .rank-labels {
+        padding-right: 5px;
+    }
+    
+    /* Menu screen adjustments */
+    .menu-title {
+        font-size: 2.5em;
+    }
+    
+    .menu-subtitle {
+        font-size: 1.1em;
     }
     
     .menu-buttons {
         flex-direction: column;
+        gap: 20px;
     }
     
     .menu-btn {
+        padding: 20px 30px;
+        font-size: 1em;
         min-width: 250px;
     }
     
+    /* Game controls */
+    .game-controls button {
+        padding: 10px 18px;
+        font-size: 0.9em;
+    }
+    
+    /* Online game elements */
     .lobby-container {
         padding: 20px;
     }

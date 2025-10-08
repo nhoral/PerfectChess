@@ -2063,8 +2063,10 @@ function renderBoard() {
                 }
                 
                 // Phase 11: Create image element instead of Unicode
+                // Use white_*.png for Player 1, black_*.png for Player 2
                 const img = document.createElement('img');
-                img.src = `./assets/white_${piece.type}.png`;
+                const colorPrefix = piece.player === 1 ? 'white' : 'black';
+                img.src = `./assets/${colorPrefix}_${piece.type}.png`;
                 img.alt = `${piece.player === 1 ? 'White' : 'Black'} ${piece.type}`;
                 img.className = 'piece-image';
                 img.draggable = false; // Important: prevent default image drag
@@ -2864,23 +2866,30 @@ function initializeChessboardGraphics() {
 
 /**
  * Phase 11: Preload all piece images for better performance
+ * Updated to load both white and black piece images
  */
 function preloadPieceImages() {
     const pieceTypes = ['pawn', 'rook', 'knight', 'bishop', 'queen', 'king'];
-    const promises = pieceTypes.map(type => {
-        return new Promise((resolve, reject) => {
-            const img = new Image();
-            img.src = `./assets/white_${type}.png`;
-            img.onload = () => {
-                console.log(`✓ Loaded: white_${type}.png`);
-                resolve();
-            };
-            img.onerror = () => {
-                console.error(`✗ Failed to load: white_${type}.png`);
-                reject(new Error(`Failed to load white_${type}.png`));
-            };
-        });
-    });
+    const colors = ['white', 'black'];
+    
+    const promises = [];
+    
+    for (const color of colors) {
+        for (const type of pieceTypes) {
+            promises.push(new Promise((resolve, reject) => {
+                const img = new Image();
+                img.src = `./assets/${color}_${type}.png`;
+                img.onload = () => {
+                    console.log(`✓ Loaded: ${color}_${type}.png`);
+                    resolve();
+                };
+                img.onerror = () => {
+                    console.error(`✗ Failed to load: ${color}_${type}.png`);
+                    reject(new Error(`Failed to load ${color}_${type}.png`));
+                };
+            }));
+        }
+    }
     
     return Promise.all(promises);
 }
@@ -2934,4 +2943,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.log('Menu ready - Choose game mode');
     showMenu();
 });
+
+/**
+ * Toggle legend visibility (Phase 12)
+ * Makes legend collapsible to save screen space
+ */
+window.toggleLegend = function() {
+    const legend = document.querySelector('.legend');
+    if (legend) {
+        legend.classList.toggle('collapsed');
+    }
+};
 
