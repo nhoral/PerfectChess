@@ -223,38 +223,41 @@ h1 {
     background-color: rgba(138, 43, 226, 0.35);
 }
 
-/* Piece styling - scaled for 103×96px tiles */
+/* Phase 11: Image-Based Piece Styling */
+
+/* Piece container - now holds image instead of Unicode text */
 .piece {
     position: relative;
-    font-size: 65px; /* Scaled for rectangular tiles */
+    width: 60px;  /* Match image width */
+    height: 70px; /* Max height to accommodate tallest piece (queen ~68px) */
+    display: flex;
+    align-items: center;
+    justify-content: center;
     user-select: none;
     z-index: 10;
-    /* Add subtle shadow for depth */
+    /* Keep the drop shadow effect */
     filter: drop-shadow(0 3px 4px rgba(0, 0, 0, 0.4));
 }
 
-/* Player 1 pieces - Light cream/beige color */
-.piece.player1-piece {
-    color: #F5E6D3;
-    /* Add dark outline for better visibility */
-    text-shadow: 
-        -1px -1px 0 #2c2c2c,
-        1px -1px 0 #2c2c2c,
-        -1px 1px 0 #2c2c2c,
-        1px 1px 0 #2c2c2c,
-        0 0 3px rgba(0, 0, 0, 0.5);
+/* The actual piece image */
+.piece-image {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain; /* Maintain aspect ratio */
+    pointer-events: none; /* Allow parent to handle drag events */
+    display: block;
 }
 
-/* Player 2 pieces - Dark charcoal/black color */
-.piece.player2-piece {
-    color: #1a1a1a;
-    /* Add light outline for better visibility */
-    text-shadow: 
-        -1px -1px 0 #e8e8e8,
-        1px -1px 0 #e8e8e8,
-        -1px 1px 0 #e8e8e8,
-        1px 1px 0 #e8e8e8,
-        0 0 3px rgba(255, 255, 255, 0.5);
+/* Player 1 pieces - Original golden/yellow color */
+.piece.player1-piece .piece-image {
+    filter: none;
+    /* Original image colors */
+}
+
+/* Player 2 pieces - Darkened to appear black */
+.piece.player2-piece .piece-image {
+    filter: brightness(0.35) contrast(1.3) saturate(0.7) hue-rotate(200deg);
+    /* Makes pieces appear dark with slight blue tint */
 }
 
 /* Piece Status Indicators (Option A) */
@@ -323,7 +326,7 @@ h1 {
 }
 
 .piece[draggable="true"]:hover {
-    transform: scale(1.08);
+    transform: scale(1.05);
 }
 
 .piece[draggable="true"]:active {
@@ -426,6 +429,15 @@ body.dragging * {
     cursor: pointer;
 }
 
+/* Touch ghost piece (mobile) - Phase 11 update */
+.touch-ghost-piece.player1-piece .piece-image {
+    filter: none; /* Original golden color */
+}
+
+.touch-ghost-piece.player2-piece .piece-image {
+    filter: brightness(0.35) contrast(1.3) saturate(0.7) hue-rotate(200deg);
+}
+
 .file-labels {
     position: absolute;
     top: 879px; /* Below board: 111px (top offset) + 768px (board height: 96*8) */
@@ -499,26 +511,26 @@ body.dragging * {
     background-color: rgba(128, 0, 128, 0.5);
 }
 
-/* Legend piece status indicators */
+/* Legend piece status indicators - updated for images */
 .legend-status {
-    font-size: 30px;
     width: 35px;
-    height: 35px;
+    height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 6px;
 }
 
+.legend-status img {
+    width: 30px;
+    height: auto;
+}
+
 .legend-status.threatened {
-    color: #F5E6D3;
-    text-shadow: -1px -1px 0 #2c2c2c, 1px -1px 0 #2c2c2c, -1px 1px 0 #2c2c2c, 1px 1px 0 #2c2c2c;
     box-shadow: 0 0 0 2px rgba(220, 20, 20, 0.9);
 }
 
 .legend-status.contested {
-    color: #F5E6D3;
-    text-shadow: -1px -1px 0 #2c2c2c, 1px -1px 0 #2c2c2c, -1px 1px 0 #2c2c2c, 1px 1px 0 #2c2c2c;
     box-shadow: 0 0 0 2px rgba(255, 165, 0, 0.9);
 }
 
@@ -832,7 +844,13 @@ body.dragging * {
     }
     
     .piece {
-        font-size: 28px;  /* Scaled: 65 * 0.43 */
+        width: 40px;  /* Scale down for mobile */
+        height: 48px;
+    }
+    
+    .piece-image {
+        max-width: 100%;
+        max-height: 100%;
     }
     
     .file-labels {

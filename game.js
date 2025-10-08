@@ -1899,28 +1899,36 @@ function handleTouchEnd(event) {
 
 /**
  * Create a ghost element for touch dragging
+ * Phase 11: Updated to clone image instead of text
  * @param {HTMLElement} pieceElement
  * @returns {HTMLElement}
  */
 function createTouchGhost(pieceElement) {
     const ghost = document.createElement('div');
     ghost.className = 'touch-ghost-piece';
-    ghost.textContent = pieceElement.textContent;
-    ghost.style.fontSize = '50px';
+    
+    // Clone the image instead of using text
+    const img = pieceElement.querySelector('.piece-image');
+    if (img) {
+        const ghostImg = img.cloneNode(true);
+        ghostImg.style.width = '60px';
+        ghostImg.style.height = 'auto';
+        ghost.appendChild(ghostImg);
+    }
+    
     ghost.style.position = 'fixed';
     ghost.style.pointerEvents = 'none';
     ghost.style.zIndex = '10000';
     ghost.style.opacity = '0.8';
     ghost.style.transform = 'translate(-50%, -50%)';
     ghost.style.transition = 'none';
+    ghost.style.filter = 'drop-shadow(0 3px 4px rgba(0, 0, 0, 0.4))';
     
-    // Copy piece styling
+    // Copy piece styling (player1 or player2 filter)
     if (pieceElement.classList.contains('player1-piece')) {
-        ghost.style.color = '#F5E6D3';
-        ghost.style.textShadow = '-1px -1px 0 #2c2c2c, 1px -1px 0 #2c2c2c, -1px 1px 0 #2c2c2c, 1px 1px 0 #2c2c2c, 0 0 3px rgba(0, 0, 0, 0.5)';
+        ghost.classList.add('player1-piece');
     } else {
-        ghost.style.color = '#1a1a1a';
-        ghost.style.textShadow = '-1px -1px 0 #e8e8e8, 1px -1px 0 #e8e8e8, -1px 1px 0 #e8e8e8, 1px 1px 0 #e8e8e8, 0 0 3px rgba(255, 255, 255, 0.5)';
+        ghost.classList.add('player2-piece');
     }
     
     return ghost;
@@ -2054,9 +2062,14 @@ function renderBoard() {
                     pieceElement.classList.add(`status-${status}`);
                 }
                 
-                // Get unicode symbol
-                const color = piece.player === 1 ? 'white' : 'black';
-                pieceElement.textContent = PIECES[piece.type][color];
+                // Phase 11: Create image element instead of Unicode
+                const img = document.createElement('img');
+                img.src = `./assets/white_${piece.type}.png`;
+                img.alt = `${piece.player === 1 ? 'White' : 'Black'} ${piece.type}`;
+                img.className = 'piece-image';
+                img.draggable = false; // Important: prevent default image drag
+                
+                pieceElement.appendChild(img);
                 
                 // Make piece draggable if it's the player's turn and it's their piece
                 const canDrag = !gameState.gameOver && piece.player === gameState.currentTurn &&
@@ -2805,7 +2818,7 @@ function copyGameUrl() {
 }
 
 // ========================================
-// Phase 10: Graphics and Debug Utilities
+// Phase 10 & 11: Graphics and Debug Utilities
 // ========================================
 
 /**
@@ -2849,13 +2862,47 @@ function initializeChessboardGraphics() {
     });
 }
 
+/**
+ * Phase 11: Preload all piece images for better performance
+ */
+function preloadPieceImages() {
+    const pieceTypes = ['pawn', 'rook', 'knight', 'bishop', 'queen', 'king'];
+    const promises = pieceTypes.map(type => {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.src = `./assets/white_${type}.png`;
+            img.onload = () => {
+                console.log(`✓ Loaded: white_${type}.png`);
+                resolve();
+            };
+            img.onerror = () => {
+                console.error(`✗ Failed to load: white_${type}.png`);
+                reject(new Error(`Failed to load white_${type}.png`));
+            };
+        });
+    });
+    
+    return Promise.all(promises);
+}
+
 // ========================================
 // Initialization
 // ========================================
 
 // Initialize the game when page loads
 document.addEventListener('DOMContentLoaded', async () => {
-    console.log('Perfect Chess - Phase 10 (Unified Background) initialized');
+    console.log('Perfect Chess - Phase 11 (Image Pieces) initialized');
+    
+    // Preload piece images first
+    try {
+        console.log('Preloading piece images...');
+        await preloadPieceImages();
+        console.log('✓ All piece images loaded successfully!');
+    } catch (error) {
+        console.error('Some piece images failed to load:', error);
+        alert('Failed to load piece images. Please check assets folder.');
+        return;
+    }
     
     // Check URL for game code (auto-join feature)
     const urlPath = window.location.pathname;
