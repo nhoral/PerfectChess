@@ -2066,7 +2066,7 @@ function renderBoard() {
                 // Use white_*.png for Player 1, black_*.png for Player 2
                 const img = document.createElement('img');
                 const colorPrefix = piece.player === 1 ? 'white' : 'black';
-                img.src = `./assets/${colorPrefix}_${piece.type}.png`;
+                img.src = `/assets/${colorPrefix}_${piece.type}.png`;
                 img.alt = `${piece.player === 1 ? 'White' : 'Black'} ${piece.type}`;
                 img.className = 'piece-image';
                 img.draggable = false; // Important: prevent default image drag
@@ -2878,7 +2878,7 @@ function preloadPieceImages() {
         for (const type of pieceTypes) {
             promises.push(new Promise((resolve, reject) => {
                 const img = new Image();
-                img.src = `./assets/${color}_${type}.png`;
+                img.src = `/assets/${color}_${type}.png`;
                 img.onload = () => {
                     console.log(`✓ Loaded: ${color}_${type}.png`);
                     resolve();
