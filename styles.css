@@ -136,51 +136,67 @@ h1 {
 }
 
 .rank-label {
-    height: 68px;
+    height: 96px; /* Match tile height */
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: bold;
     color: #555;
-    font-size: 1.2em;
+    font-size: 1.3em;
 }
 
-.board-container {
-    display: flex;
-    flex-direction: column;
+/* Phase 10: Unified Chessboard Background */
+
+/* Chessboard container - holds background and grid */
+.chessboard-container {
+    position: relative;
+    width: 1028px;
+    height: 1028px;
+    margin: 0 auto;
 }
 
-.chessboard {
+/* Background image - lowest layer */
+.chessboard-background {
+    position: absolute;
+    border: 1px solid #000;
+    top: 0;
+    left: 0;
+    width: 1028px;
+    height: 1028px;
+    pointer-events: none; /* Don't block tile interactions */
+    z-index: 0;
+    user-select: none;
+}
+
+/* Interactive grid - positioned over background */
+.chessboard-grid {
+    position: absolute;
+    top: 112px;  /* Offset from top of background - ADJUSTING */
+    left: 101px;  /* Offset from left of background - ADJUSTING */
     display: grid;
-    grid-template-columns: repeat(8, 68px);
-    grid-template-rows: repeat(8, 68px);
-    border: 3px solid #333;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    grid-template-columns: repeat(8, 104px);  /* Actual tile width */
+    grid-template-rows: repeat(8, 100px);      /* Actual tile height */
+    z-index: 1;
 }
 
+/* Tiles - now transparent interactive areas */
 .tile {
-    width: 68px;
-    height: 68px;
+    width: 104px;   /* Match background tile width */
+    height: 100px;   /* Match background tile height */
     display: flex;
     align-items: center;
     justify-content: center;
     position: relative;
-    font-size: 40px;
+    background-color: transparent; /* No background needed */
     transition: all 0.2s ease;
-    background-size: cover;
-    background-position: center;
 }
 
-/* Base square images */
-.tile.light {
-    background-image: url('./assets/tile_a.png');
+/* Debug mode - show tile boundaries (optional) */
+.chessboard-container.debug .tile {
+    outline: 1px dashed rgba(255, 0, 0, 0.3);
 }
 
-.tile.dark {
-    background-image: url('./assets/tile_b.png');
-}
-
-/* Overlay colors - using pseudo-element to layer on top of base colors */
+/* Overlay colors - adjust for new tile size */
 .tile.overlay-blue::before,
 .tile.overlay-red::before,
 .tile.overlay-purple::before {
@@ -192,28 +208,29 @@ h1 {
     bottom: 0;
     pointer-events: none;
     z-index: 1;
+    border-radius: 2px; /* Slight rounding for aesthetics */
 }
 
 .tile.overlay-blue::before {
-    background-color: rgba(0, 0, 255, 0.25);
+    background-color: rgba(100, 149, 237, 0.35); /* Slightly stronger for visibility */
 }
 
 .tile.overlay-red::before {
-    background-color: rgba(255, 0, 0, 0.25);
+    background-color: rgba(220, 53, 69, 0.35);
 }
 
 .tile.overlay-purple::before {
-    background-color: rgba(128, 0, 128, 0.25);
+    background-color: rgba(138, 43, 226, 0.35);
 }
 
-/* Piece styling */
+/* Piece styling - scaled for 103×96px tiles */
 .piece {
     position: relative;
-    font-size: 45px;
+    font-size: 65px; /* Scaled for rectangular tiles */
     user-select: none;
     z-index: 10;
     /* Add subtle shadow for depth */
-    filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.3));
+    filter: drop-shadow(0 3px 4px rgba(0, 0, 0, 0.4));
 }
 
 /* Player 1 pieces - Light cream/beige color */
@@ -361,12 +378,12 @@ body.dragging * {
     z-index: 5;
 }
 
-/* Legal move indicators */
+/* Legal move indicators - scaled for rectangular tiles */
 .tile.legal-move::after {
     content: '';
     position: absolute;
-    width: 30%;
-    height: 30%;
+    width: 32px;  /* Scaled for 103px wide tiles */
+    height: 32px; /* Circular indicator */
     background-color: rgba(0, 255, 0, 0.6);
     border-radius: 50%;
     pointer-events: none;
@@ -375,18 +392,18 @@ body.dragging * {
 
 /* Legal move on occupied square (capture) - show larger ring */
 .tile.legal-move:has(.piece)::after {
-    width: 80%;
-    height: 80%;
+    width: 80px;  /* Capture indicator */
+    height: 75px; /* Slightly oval to fit rectangular tiles */
     background-color: transparent;
-    border: 4px solid rgba(0, 255, 0, 0.7);
+    border: 5px solid rgba(0, 255, 0, 0.7);
     border-radius: 50%;
 }
 
 /* Manual legal move indicators (used during drag) */
 .legal-move-indicator {
     position: absolute;
-    width: 30%;
-    height: 30%;
+    width: 32px;
+    height: 32px;
     background-color: rgba(0, 255, 100, 0.6);
     border-radius: 50%;
     pointer-events: none;
@@ -396,10 +413,10 @@ body.dragging * {
 
 /* Legal move indicator for capture moves */
 .legal-move-indicator.capture-indicator {
-    width: 80%;
-    height: 80%;
+    width: 80px;
+    height: 75px;
     background-color: transparent;
-    border: 4px solid rgba(0, 255, 100, 0.9);
+    border: 5px solid rgba(0, 255, 100, 0.9);
     border-radius: 50%;
     box-shadow: 0 0 15px rgba(0, 255, 100, 1);
 }
@@ -410,17 +427,20 @@ body.dragging * {
 }
 
 .file-labels {
+    position: absolute;
+    top: 879px; /* Below board: 111px (top offset) + 768px (board height: 96*8) */
+    left: 93px; /* Match board offset */
     display: grid;
-    grid-template-columns: repeat(8, 68px);
-    margin-top: 10px;
+    grid-template-columns: repeat(8, 103px);
+    width: 824px; /* 103px * 8 tiles */
 }
 
 .file-label {
-    width: 68px;
+    width: 103px;
     text-align: center;
     font-weight: bold;
     color: #555;
-    font-size: 1.2em;
+    font-size: 1.3em;
 }
 
 /* Legend */
@@ -789,27 +809,60 @@ body.dragging * {
 
 /* Responsive adjustments */
 @media (max-width: 600px) {
-    .chessboard {
-        grid-template-columns: repeat(8, 45px);
-        grid-template-rows: repeat(8, 45px);
+    .chessboard-container {
+        width: 445px;  /* Scale down proportionally (1028 * 0.433) */
+        height: 445px;
+    }
+    
+    .chessboard-background {
+        width: 445px;
+        height: 445px;
+    }
+    
+    .chessboard-grid {
+        top: 48px;  /* Scaled: 111 * 0.433 */
+        left: 40px;  /* Scaled: 93 * 0.433 */
+        grid-template-columns: repeat(8, 45px);  /* Scaled: 103 * 0.437 */
+        grid-template-rows: repeat(8, 42px);     /* Scaled: 96 * 0.437 */
     }
     
     .tile {
         width: 45px;
-        height: 45px;
-        font-size: 30px;
+        height: 42px;
+    }
+    
+    .piece {
+        font-size: 28px;  /* Scaled: 65 * 0.43 */
     }
     
     .file-labels {
+        top: 384px;  /* Scaled: 879 * 0.437 */
+        left: 40px;   /* Scaled: 93 * 0.433 */
         grid-template-columns: repeat(8, 45px);
+        width: 360px; /* 45px * 8 tiles */
     }
     
     .file-label {
         width: 45px;
+        font-size: 1em;
     }
     
     .rank-label {
-        height: 45px;
+        height: 42px;  /* Match mobile tile height */
+        font-size: 1em;
+    }
+    
+    .legal-move-indicator,
+    .tile.legal-move::after {
+        width: 14px;
+        height: 14px;
+    }
+    
+    .legal-move-indicator.capture-indicator,
+    .tile.legal-move:has(.piece)::after {
+        width: 35px;
+        height: 33px;
+        border-width: 3px;
     }
     
     .menu-buttons {

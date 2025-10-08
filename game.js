@@ -2805,12 +2805,57 @@ function copyGameUrl() {
 }
 
 // ========================================
+// Phase 10: Graphics and Debug Utilities
+// ========================================
+
+/**
+ * Toggle debug mode to show tile boundaries
+ * Useful during development to verify alignment
+ */
+function toggleDebugMode() {
+    const container = document.querySelector('.chessboard-container');
+    if (container) {
+        container.classList.toggle('debug');
+        console.log('Debug mode:', container.classList.contains('debug') ? 'ON' : 'OFF');
+    }
+}
+
+/**
+ * Ensure chessboard background is loaded before starting game
+ */
+function initializeChessboardGraphics() {
+    return new Promise((resolve, reject) => {
+        const bgImage = document.querySelector('.chessboard-background');
+        
+        if (!bgImage) {
+            console.warn('Chessboard background element not found - may be in menu');
+            resolve(); // Don't block if not on game screen yet
+            return;
+        }
+        
+        if (bgImage.complete) {
+            console.log('Chessboard background loaded successfully');
+            resolve();
+        } else {
+            bgImage.addEventListener('load', () => {
+                console.log('Chessboard background loaded successfully');
+                resolve();
+            });
+            bgImage.addEventListener('error', () => {
+                console.error('Failed to load chessboard background');
+                reject(new Error('Chessboard background failed to load'));
+            });
+        }
+    });
+}
+
+// ========================================
 // Initialization
 // ========================================
 
 // Initialize the game when page loads
 document.addEventListener('DOMContentLoaded', async () => {
-    console.log('Perfect Chess - Phase 8 (Guest Mode) initialized');
+    console.log('Perfect Chess - Phase 10 (Unified Background) initialized');
     
     // Check URL for game code (auto-join feature)
     const urlPath = window.location.pathname;
@@ -2829,6 +2874,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('btn-play-online')?.addEventListener('click', startOnline);
     document.getElementById('btn-back-to-menu')?.addEventListener('click', showMenu);
     document.getElementById('btn-new-game')?.addEventListener('click', newGame);
+    
+    // Add keyboard shortcut for debug mode (Ctrl+Shift+D)
+    document.addEventListener('keydown', (e) => {
+        if (e.ctrlKey && e.shiftKey && e.key === 'D') {
+            e.preventDefault();
+            toggleDebugMode();
+        }
+    });
     
     // Show menu
     console.log('Menu ready - Choose game mode');

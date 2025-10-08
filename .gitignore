@@ -10,6 +10,9 @@ node_modules/
 dist/
 build/
 
+# References
+references/
+
 # Editor directories and files
 .vscode/
 .idea/
