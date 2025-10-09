@@ -63,6 +63,9 @@ body {
     min-width: 200px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
     color: #F5E6D3;
+    /* Fix mobile touch issues */
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: rgba(255, 215, 0, 0.3);
 }
 
 .menu-btn:hover {
@@ -647,6 +650,7 @@ body.dragging * {
     cursor: pointer;
     transition: all 0.3s ease;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    touch-action: manipulation;
 }
 
 .game-controls button:hover {
@@ -718,6 +722,7 @@ body.dragging * {
     background: rgba(139, 115, 85, 0.9); /* Warm brown */
     color: #F5E6D3;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    touch-action: manipulation;
 }
 
 .game-over-btn:hover {
@@ -867,6 +872,7 @@ body.dragging * {
     transition: all 0.3s ease;
     font-weight: 600;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    touch-action: manipulation;
 }
 
 .btn-primary:hover {
@@ -888,6 +894,7 @@ body.dragging * {
     transition: all 0.3s ease;
     font-weight: 600;
     box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+    touch-action: manipulation;
 }
 
 .btn-secondary:hover {
